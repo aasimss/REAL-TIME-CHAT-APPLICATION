@@ -19,31 +19,22 @@ The file follows the standard HTML5 structure:
 Head Section:
 
 Defines the character encoding and viewport settings for responsiveness.
-
 Adds a title for the page: "Realtime Chat (React + WebSocket)".
-
 Loads Tailwind CSS from a CDN for fast and simple styling.
-
 Contains custom CSS to hide scrollbars (giving a clean design).
 
 Body Section:
 
 Contains a <div> with the id "root", which acts as the main mounting point for the React application.
-
 Loads React, ReactDOM, and Babel via <script> tags. Babel allows JSX syntax to be compiled directly in the browser.
-
 The React Components
-
 The React code is wrapped inside a <script type="text/babel"> block.
 
 Message Component:
 
 A small functional component that displays a chat bubble.
-
 It uses a me prop to decide whether the message belongs to the current user or another user.
-
 If it’s the current user’s message, it is styled with a blue background and aligned to the right.
-
 Otherwise, it is shown with a gray background aligned to the left.
 
 ChatApp Component:
