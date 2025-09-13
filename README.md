@@ -91,9 +91,10 @@ Auto-scroll ensures the user always sees the latest message.
 Functionality
 
 When the app starts, it tries to connect to a WebSocket server running on localhost:3000.
-
 Once connected, users can type and send messages.
-
 Messages sent by the user appear on the right in blue, while incoming messages from others appear on the left in gray.
-
 The connection status updates in real time.
+
+OUTPUT :
+
+<img width="1316" height="666" alt="Image" src="https://github.com/user-attachments/assets/64cc5344-f388-42fd-a7d5-77ba35eb8100" />
