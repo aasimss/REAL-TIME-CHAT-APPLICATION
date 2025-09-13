@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Realtime Chat (React + WebSocket)</title>
+  <!-- Tailwind (for quick, responsive UI) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+  <div id="root" class="w-full max-w-3xl"></div>
+
+  <!-- React + Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useEffect, useRef, useState } = React;
+
+    // ---- Config ----
+    const WS_URL = "ws://localhost:3000"; // 👈 Your local WebSocket server
+
+    function Message({ me, text }) {
+      return (
+        <div className={`flex ${me ? "justify-end" : "justify-start"} mb-2`}>
+          <div className={`max-w-[75%] rounded-lg px-3 py-2 shadow
+                           ${me ? "bg-blue-600 text-white" : "bg-gray-200 text-black"}`}>
+            {text}
+          </div>
+        </div>
+      );
+    }
+
+    function ChatApp() {
+      const [messages, setMessages] = useState([]);
+      const [input, setInput] = useState("");
+      const [connected, setConnected] = useState(false);
+      const wsRef = useRef(null);
+      const listRef = useRef(null);
+
+      // Auto-scroll on new messages
+      useEffect(() => {
+        listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+      }, [messages]);
+
+      useEffect(() => {
+        const ws = new WebSocket(WS_URL);
+        wsRef.current = ws;
+
+        ws.onopen = () => setConnected(true);
+        ws.onclose = () => setConnected(false);
+        ws.onmessage = (e) => {
+          setMessages((prev) => [...prev, { text: e.data, me: false }]);
+        };
+
+        return () => ws.close();
+      }, []);
+
+      function sendMessage() {
+        if (!input.trim()) return;
+        wsRef.current.send(input);
+        setMessages((prev) => [...prev, { text: input, me: true }]);
+        setInput("");
+      }
+
+      function handleKey(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          sendMessage();
+        }
+      }
+
+      return (
+        <div className="w-full bg-white rounded-2xl shadow-lg border overflow-hidden">
+          {/* Header */}
+          <div className="px-4 py-3 border-b flex items-center justify-between">
+            <h1 className="font-semibold">💬 Realtime Chat</h1>
+            <span className={`text-sm ${connected ? "text-green-600" : "text-red-500"}`}>
+              {connected ? "Connected" : "Disconnected"}
+            </span>
+          </div>
+
+          {/* Messages */}
+          <div ref={listRef} className="h-[60vh] overflow-y-auto p-3 no-scrollbar bg-slate-50">
+            {messages.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-gray-400">
+                No messages yet. Start chatting!
+              </div>
+            ) : (
+              messages.map((m, i) => (
+                <Message key={i} me={m.me} text={m.text} />
+              ))
+            )}
+          </div>
+
+          {/* Composer */}
+          <div className="p-3 border-t bg-white flex gap-2">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKey}
+              placeholder="Type a message…"
+              className="flex-1 resize-none h-12 px-3 py-2 border rounded-lg outline-none focus:ring"
+            />
+            <button
+              onClick={sendMessage}
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium disabled:opacity-60"
+              disabled={!connected}
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<ChatApp />);
+  </script>
+</body>
+</html>
